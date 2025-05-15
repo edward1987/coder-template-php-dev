@@ -1,15 +1,15 @@
 ---
-display_name: Laravel Dev Environment (PHP 8.3)
-description: Full-featured Laravel development container with PHP 8.3, Nginx, MariaDB 10 and Git integration.
-icon: ../../../site/static/icon/laravel.svg
+display_name: PHP Dev Environment (PHP 8.3 + Nginx + MariaDB)
+description: Lightweight PHP development container with Nginx and MariaDB 10.
+icon: ../../../site/static/icon/php.png
 maintainer_github: your_github_username
 verified: true
-tags: [laravel, php, nginx, mariadb, docker, devcontainer, git]
+tags: [php, docker, nginx, mariadb, devcontainer]
 ---
 
-# 🚀 Laravel Development Environment (PHP 8.3 + Nginx + MariaDB)
+# ⚙️ PHP Development Environment (PHP 8.3 + Nginx + MariaDB)
 
-This Coder template provisions a complete Docker-based Laravel development environment using PHP 8.3, Nginx, and MariaDB 10. It supports automatic Git cloning or fresh Laravel installation via Composer, complete with Node.js, database setup, and VSCode in the browser.
+This Coder template provisions a Docker-based development container using PHP 8.3 with Nginx and MariaDB 10. It provides a general-purpose PHP setup for developing and testing PHP applications without any framework scaffolding or Git integration.
 
 ---
 
@@ -18,89 +18,61 @@ This Coder template provisions a complete Docker-based Laravel development envir
 - **PHP 8.3 (FPM)**
 - **Nginx**
 - **MariaDB 10**
-- **Laravel (auto-install or Git-based)**
-- **Node.js (via NVM)**
-- **Code-Server (VSCode in browser)**
-- **PhpMyAdmin** available at `/phpmyadmin`
+- **PhpMyAdmin** (accessible at `/phpmyadmin`)
+- **Code-Server** (VSCode in browser)
 
 ---
 
-## 📦 Features
+## ✅ Features
 
-- Automatic cloning of a Git repo _or_ `composer create-project`
-- Environment variables injected: `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
-- `.env` file automatically generated and configured
-- Unique MySQL container per workspace
-- PhpMyAdmin for DB management
-- Code-server available at port `13337`
-- Laravel auto-setup: `key:generate`, `.env`, dependencies
-- `npm install` and `npm run build` auto-executed if `package.json` exists
-
----
-
-## ⚙️ How It Works
-
-### 🗃️ Parameters
-
-| Parameter           | Description                                                |
-|---------------------|------------------------------------------------------------|
-| `repo`              | Select Laravel default or custom Git repository           |
-| `custom_repo`       | If custom repo selected, provide a Git URL (https supported) |
-| `custom_repo_user`  | (Optional) Username for private Git repository            |
-| `custom_repo_token` | (Optional) Access token for private Git repository        |
-
-> The template decides whether to clone or install based on these values.
+- Clean PHP 8.3 development environment
+- Nginx reverse proxy configured for `/var/www/html`
+- Persistent workspace volume for all project files
+- Auto-start via Supervisor
+- PhpMyAdmin for database management
+- Code-server running on port `13337`
+- Auto-generated MySQL credentials
+- Dynamic `.env` file generation if needed
 
 ---
 
-### 🗂 Folder Structure
+## 🧱 Architecture
 
-The Laravel project is installed or cloned to:
+- One **ephemeral** Docker container for your development tools
+- One **MariaDB 10 container** per workspace, uniquely named
+- One **Docker volume** for PHP files mounted at `/var/www/html`
 
-/var/www/html
-
-yaml
-Copy
-Edit
-
-Volumes are mounted per workspace. All PHP, Nginx, and Laravel files are persistent.
+You can build any PHP project from scratch or upload files via VSCode.
 
 ---
 
-### 🧱 MySQL Configuration
+## 💾 MySQL Configuration
 
-- The template creates a **unique MariaDB container per workspace**
-- A random or parameterized:
-  - Database name
-  - Username
-  - Password
-- `.env` values are injected dynamically, even if defaults are commented in `env.example`
+Each workspace provisions a dedicated MariaDB instance with:
 
-Sample injected values:
+- Unique **database name**
+- Unique **user**
+- Unique **password**
 
-```env
-DB_CONNECTION=mysql
-DB_HOST=coder-workspace-mysql-123abc
-DB_PORT=3306
-DB_DATABASE=dev_db_xyz
-DB_USERNAME=user_xyz
-DB_PASSWORD=securepass123
-PhpMyAdmin is accessible at http://localhost/phpmyadmin.
+These are injected into the environment and `.env` file (if detected). PhpMyAdmin is available at `http://localhost/phpmyadmin`.
 
-🛠 Node & Assets
-Installs Node.js 22 using NVM
+Sample environment variables injected:
 
-Automatically runs:
+
+🛠 Node.js (Optional)
+If your PHP project uses frontend tooling:
+
+Node.js 22 is installed via NVM
+
+Auto-detects package.json and runs:
 
 bash
 Copy
 Edit
 npm install
 npm run build
-If package.json is present.
-
 🧪 Prerequisites
-Make sure the coder user on the Coder host is in the Docker group:
+Make sure the Coder host supports Docker and the coder user has access:
 
 bash
 Copy
@@ -108,3 +80,8 @@ Edit
 sudo usermod -aG docker coder
 sudo systemctl restart coder
 sudo -u coder docker ps
+🌐 Available Services
+Service	Access Path	Description
+PHP App	/	Served via Nginx + PHP-FPM
+PhpMyAdmin	/phpmyadmin	MariaDB management
+Code Server	:13337	VSCode in the browser
