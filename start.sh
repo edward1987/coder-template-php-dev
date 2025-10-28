@@ -1,9 +1,9 @@
 #!/bin/bash
 echo "[DEBUG] Waiting for attach..." && sleep 5
+sudo mkdir -p "$WORKDIR"
 cd "$WORKDIR"
 echo "[INFO] Adjusting permissions..."
-sudo chown -R $USER:$USER /var/www/html
-sudo chown -R $USER:$USER /var/www
+sudo chown -R $USER:$USER "$WORKDIR"
 sudo chown -R $USER:$USER /home/$USER
 sudo update-alternatives --set php /usr/bin/php8.3
 
@@ -29,6 +29,6 @@ echo "[INFO] Installing and starting code-server..."
 curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server
 /tmp/code-server/bin/code-server --auth none --port 13337 --disable-telemetry > /tmp/code-server.log 2>&1 &
 
-# Start Supervisor (nginx + php-fpm)
+# Start Supervisor (Apache)
 echo "[INFO] Starting supervisord..."
 exec sudo /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf > /tmp/supervisor.log 2>&1 &

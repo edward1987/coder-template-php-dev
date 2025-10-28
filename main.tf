@@ -20,7 +20,7 @@ module "filebrowser" {
   source   = "registry.coder.com/modules/filebrowser/coder"
   version  = "1.0.8"
   agent_id = coder_agent.main.id
-  folder   = "/var/www/html"
+  folder   = "/home/coder/www"
   database_path = "/home/coder/filebrowser.db"
 }
 
@@ -29,7 +29,7 @@ module "jetbrains_gateway" {
   version        = "1.0.9"
   agent_id       = coder_agent.main.id
   agent_name     = "main"
-  folder         = "/var/www/html"
+  folder         = "/home/coder/www"
   jetbrains_ides = ["WS", "IU", "PS"]
   default        = "IU"
 }
@@ -62,7 +62,7 @@ resource "coder_app" "code-server" {
   agent_id     = coder_agent.main.id
   slug         = "code-server"
   display_name = "VS Code Web"
-  url          = "http://localhost:13337/?folder=/var/www/html"
+  url          = "http://localhost:13337/?folder=/home/coder/www"
   icon         = "/icon/code.svg"
   subdomain    = false
   share        = "owner"
@@ -84,7 +84,7 @@ resource "coder_agent" "main" {
     /usr/local/bin/start.sh &
     sleep 100
   EOT
-  dir            = "/var/www/html"
+  dir            = "/home/coder/www"
 
   env = {
   GIT_AUTHOR_NAME     = data.coder_workspace_owner.me.name
@@ -113,7 +113,7 @@ resource "coder_agent" "main" {
   metadata {
     display_name = "Home Disk"
     key          = "3_home_disk"
-    script       = "coder stat disk --path /var/www/html"
+    script       = "coder stat disk --path /home/coder/www"
     interval     = 60
     timeout      = 1
   }
@@ -174,6 +174,7 @@ resource "random_pet" "mysql_db" {
 resource "docker_container" "mysql" {
   name  = "coder-${data.coder_workspace.me.name}-mysql"
   image = "mariadb:10"
+  depends_on = [docker_volume.mysql_data]
 
   env = [
     "MYSQL_ROOT_PASSWORD=${random_password.mysql_password.result}",
@@ -184,7 +185,7 @@ resource "docker_container" "mysql" {
 
   volumes {
     container_path = "/var/lib/mysql"
-    volume_name    = "coder-${data.coder_workspace.me.name}-mysql"
+    volume_name    = docker_volume.mysql_data.name
     read_only      = false
   }
 
@@ -198,6 +199,10 @@ resource "docker_container" "mysql" {
   }
 }
 
+resource "docker_volume" "mysql_data" {
+  name = "coder-${data.coder_workspace.me.name}-mysql-data"
+}
+
 
 resource "docker_image" "main" {
   name = data.coder_workspace.me.name
@@ -206,7 +211,7 @@ resource "docker_image" "main" {
     context = "./build"
     build_args = {
       USER = "coder"
-      WORKDIR = "/var/www/html"
+      WORKDIR = "/home/coder/www"
     }
   }
 
@@ -248,8 +253,8 @@ resource "docker_container" "workspace" {
 
 
 
-  env = [   
-    "WORKDIR=/var/www/html",
+  env = [
+    "WORKDIR=/home/coder/www",
     
     "DOCKER_HOST=${docker_container.dind.name}:2375",
     "CODER_AGENT_TOKEN=${coder_agent.main.token}",
@@ -274,14 +279,14 @@ resource "docker_container" "workspace" {
   }
 
   volumes {
-    container_path = "/var/www/html"
+    container_path = "/home/coder/www"
     volume_name    = "coder-${data.coder_workspace.me.name}-project"
     read_only      = false
   }
 
   volumes {
     container_path = "/var/lib/mysql"
-    volume_name    = "coder-${data.coder_workspace.me.name}-mysql"
+    volume_name    = docker_volume.mysql_data.name
     read_only      = false
   }
 

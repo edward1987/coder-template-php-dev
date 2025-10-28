@@ -1,22 +1,22 @@
 ---
-display_name: PHP Dev Environment (PHP 8.3 + Nginx + MariaDB)
-description: Lightweight PHP development container with Nginx and MariaDB 10.
+display_name: PHP Dev Environment (PHP 8.3 + Apache + MariaDB)
+description: Lightweight PHP development container with Apache and MariaDB 10.
 icon: ../../../site/static/icon/php.png
 maintainer_github: your_github_username
 verified: true
-tags: [php, docker, nginx, mariadb, devcontainer]
+tags: [php, docker, apache, mariadb, devcontainer]
 ---
 
-# ⚙️ PHP Development Environment (PHP 8.3 + Nginx + MariaDB)
+# ⚙️ PHP Development Environment (PHP 8.3 + Apache + MariaDB)
 
-This Coder template provisions a Docker-based development container using PHP 8.3 with Nginx and MariaDB 10. It provides a general-purpose PHP setup for developing and testing PHP applications without any framework scaffolding or Git integration.
+This Coder template provisions a Docker-based development container using PHP 8.3 with Apache and MariaDB 10. It provides a general-purpose PHP setup for developing and testing PHP applications without any framework scaffolding or Git integration.
 
 ---
 
 ## 🧰 Stack Overview
 
 - **PHP 8.3 (FPM)**
-- **Nginx**
+- **Apache 2**
 - **MariaDB 10**
 - **PhpMyAdmin** (accessible at `/phpmyadmin`)
 - **Code-Server** (VSCode in browser)
@@ -26,7 +26,7 @@ This Coder template provisions a Docker-based development container using PHP 8.
 ## ✅ Features
 
 - Clean PHP 8.3 development environment
-- Nginx reverse proxy configured for `/var/www/html`
+- Apache configured for `/home/coder/www`
 - Persistent workspace volume for all project files
 - Auto-start via Supervisor
 - PhpMyAdmin for database management
@@ -40,7 +40,8 @@ This Coder template provisions a Docker-based development container using PHP 8.
 
 - One **ephemeral** Docker container for your development tools
 - One **MariaDB 10 container** per workspace, uniquely named
-- One **Docker volume** for PHP files mounted at `/var/www/html`
+- One **Docker volume** for PHP files mounted at `/home/coder/www`
+- One **Docker volume** for MariaDB data mounted at `/var/lib/mysql`
 
 You can build any PHP project from scratch or upload files via VSCode.
 
@@ -82,6 +83,6 @@ sudo systemctl restart coder
 sudo -u coder docker ps
 🌐 Available Services
 Service	Access Path	Description
-PHP App	/	Served via Nginx + PHP-FPM
+PHP App	/	Served via Apache + PHP 8.3
 PhpMyAdmin	/phpmyadmin	MariaDB management
 Code Server	:13337	VSCode in the browser
