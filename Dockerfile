@@ -10,7 +10,10 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # Instalare dependențe de bază și PPA pentru PHP 8.3
 RUN apt-get update && apt-get install -y \
     software-properties-common gnupg curl zip unzip git supervisor \
-    apache2 mariadb-client lsb-release ca-certificates phpmyadmin && \
+    apache2 mariadb-client lsb-release ca-certificates debconf-utils && \
+    echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" | debconf-set-selections && \
+    echo "phpmyadmin phpmyadmin/dbconfig-install boolean false" | debconf-set-selections && \
+    apt-get install -y phpmyadmin && \
     add-apt-repository ppa:ondrej/php -y && \
     apt-get update && \
     apt-get install -y \
@@ -49,7 +52,7 @@ RUN mkdir -p /run/php && chown coder:coder /run/php
 RUN sed -i 's/^APACHE_RUN_USER=.*/APACHE_RUN_USER=coder/' /etc/apache2/envvars && \
     sed -i 's/^APACHE_RUN_GROUP=.*/APACHE_RUN_GROUP=coder/' /etc/apache2/envvars && \
     a2enmod rewrite && \
-    a2enconf phpmyadmin && \
+    if [ -f /etc/apache2/conf-available/phpmyadmin.conf ]; then a2enconf phpmyadmin; fi && \
     mkdir -p /run/apache2 /var/lock/apache2 /var/log/apache2 && \
     chown -R coder:coder /run/apache2 /var/log/apache2 /var/lock/apache2
 # Instalare NVM + Node.js v22 pentru utilizatorul coder
